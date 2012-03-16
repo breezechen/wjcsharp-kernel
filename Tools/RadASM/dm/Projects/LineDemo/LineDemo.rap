@@ -1,0 +1,108 @@
+[Project]
+Assembler=dm
+Type=Win32 App (no res)
+Description=Demo of lines Petzold 5.3
+Backup=$P\Bak\
+Group=1
+GroupExpand=1
+[Files]
+1=LineDemo.c
+2=LineDemo.h
+[MakeFiles]
+0=LineDemo.rap
+1=LineDemo.rc
+2=LineDemo.c
+3=LineDemo.obj
+4=LineDemo.res
+5=LineDemo.exe
+6=LineDemo.def
+7=LineDemo.dll
+8=LineDemo.txt
+9=LineDemo.lib
+10=LineDemo.mak
+11=LineDemo.cpp
+12=LineDemo.com
+13=LineDemo.ocx
+14=LineDemo.idl
+15=LineDemo.tlb
+[MakeDef]
+Menu=0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0
+1=
+2=0,O,$B\dmc.exe -I"$L"  -mn -c -WA -6 -S -C -P -o"$3",2 
+3=5,O,$B\link.exe /SCANLIB /MACHINE:i386 /NOMAP /NOLOGO /SUBSYSTEM:WINDOWS /EXETYPE:NT "$C"\"$3" | "$5" || gdi32.lib
+4=0,0,,5
+5=
+6=*.obj,O,$B\dmc  /mn /c  /I"$I",*.c
+7=0,0,"$E\OllyDbg",5
+11=
+12=3,C,$B\dmc.exe  -S -mn -p -c -C -d -o"$3" -o+space | 2
+13=5,O,$B\link.exe /SUBSYSTEM:WINDOWS /EXETYPE:NT "$3" | "$5"
+14=0,0,,5
+15=rsrc.obj,O,$D\CVTRES.EXE,rsrc.res
+16=*.obj,O,$B\dmc  /mn /c /g2  /I"$I",*.c
+17=0,0,"$E\OllyDbg",5
+[Group]
+Group=Added files,Assembly,Resources,Misc,Modules
+1=2
+2=2
+[VersionControl]
+Settings=512
+Milestones=129
+MilestoneEvery=10
+MilestoneEveryCurrent=0
+MilestoneOnBuild=0.0.0.0
+MilestoneOnTime=2
+MilestoneOnDate=0
+MilestoneOnDateWhen=1
+MilestoneOnDateStatus=0
+MilestoneOnDateDate=8
+MilestoneOnDateTimeYear=2008
+MilestoneOnDateTimeMonth=6
+MilestoneOnDateTimeDate=25
+MilestoneOnDateTimeHour=22
+MilestoneOnDateTimeMin=18
+MilestoneOnDateTimeSec=5
+MilestoneOnDateTimeStatus=0
+BackupLocation=C:\RADASM\Lcc\Projects\VCBackups\
+CompressionLevel=0
+DefaultComment=Project $N, $Z, Backup Created On $D At $T.
+ExcludeExt1=\
+ExcludeExt2=\
+ExcludeExt3=\
+ExcludeExt4=\
+FileVerLength=4
+FileVer2Range=0
+FileVer3Range=0
+FileVer4Range=0
+ProductVerLength=4
+ProductVer2Range=0
+ProductVer3Range=0
+ProductVer4Range=0
+[Colref]
+0=00FFFFFF
+1=00FFFFFF
+2=00FFFFFF
+3=00FFFFFF
+4=00FFFFFF
+5=00FFFFFF
+6=00FFFFFF
+7=00FFFFFF
+[PTimer]
+PTimer=3453390
+[Collapse]
+1=
+[Size]
+1=0,0,0,0,2223
+[BookMark]
+0=
+1=
+2=
+3=
+4=
+5=
+6=
+7=
+8=
+9=
+[BreakPoint]
+0=

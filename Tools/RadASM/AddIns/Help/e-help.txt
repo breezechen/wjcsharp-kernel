@@ -1,0 +1,85 @@
+addin for radasm:
+
+This addin is coded in power basic, because this way i could reuse a lot of code i had written 
+for a similar extension of hutch´s masm package for my own purposes.
+
+It somehow combines the functionality of the msdnhelp addin and melt addin. The main difference
+is, it can be made working with other assemblers than masm too and it does not use "black boxes"
+you can chage everthing to your personal needs, if you wish. Melt and msdnhelp must be disabled
+for this addin to work correctly! 
+
+What does it offer:
+Pressing "F1" while the caret is on an error line in code window, will show a message box 
+containing the corresponding error text for this error number reported by masm (or other 
+assemblers) in output#1. If there is more than one error reported for this line, pressing "OK" 
+will show the next error text for the next error and so on. The file "error.txt" is assembler 
+specific and can be manually edited and extended and must be specified in the corresponding 
+.ini file. This package includes a file "error.txt" for masm including all common errors for 
+ml.exe, link.exe and rc.exe. You can easily write a similar error file for other assemblers or
+linkers (format of error file see below). Doubleclicking the error number in output window will 
+also show the corresponding error text.
+
+If the caret is not on an error line and not inside word boundaries radasm help is invoked.
+If the caret marks a keyword, radasm´s keyword list for syntax highlighting in the 
+corresponding .ini file is used as a lookup list for the assembler help file. If the keyword 
+is found, assembler help for this keyword is invoked. If not, the opcodes keyword list is used 
+to lookup, if the keyword is an opcode. If so, opcode help for this opcode is invoked. If the 
+keyword doesn´t match both, assembler keyword list and opcode keyword list, win32api help is 
+invoked.
+
+If the current file is a .rc file, rc help and rc keywords list is used instead of assembler 
+help, if the keyword is not a rc keyword win32api help is invoked 
+
+Pressing "Ctrl+F1" invokes Msdn-help.
+
+I added mousewheel support to all .hlp files (including those invoked by help menu)
+
+Furthermore i coded a special feature for comments. The "tab" or "ctrl+k" key (this can be set
+with addin manager) inserts a corresponding comment character (asm/rc file) into the current 
+line at a specific position and moves the caret to this position. If there is already a comment
+in this line, the comment is repositioned, if it is not in correct position, and the caret is 
+moved to this position. "Tab" with listboxes in code window works as before. I chose the "tab" 
+key, because i don´t use tabs, when editing code. If you do not like this, choose "ctrl+k" or
+disable this feature entirely. Addin manager allows for choosing between three comment positions.
+  
+
+ 
+how to install "error.txt"
+add "Text" key to [Error] section in your assembler .ini file
+
+[Error]
+1=...
+;specify path + filename of your error file text
+Text=$R\masm\bin\error.txt
+
+
+Format of error.txt:
+error number (uppercase), space(s), short error description (only used, if there is no further 
+text output with the error number), new line, extended error description (may be one or more 
+lines but must not contain empty lines), empty line(s), next error number, ....
+There is no specific order of error number required.
+
+
+
+how to install your help files:
+add this new section to your assembler .ini file
+
+[HelpFiles]
+;assembler help file
+1=$H\Masm32.hlp
+;opcodes help file
+2=$H\x86eas.hlp
+;win32api help file
+3=c:\tools\win-ide\docs\api reference\win32-help\win32.hlp
+;msdn help file
+4=C:\Programme\Microsoft Visual Studio\MSDN98\98VSa\1031\msdnvs6a.col
+;rc help file
+5=$B\Rc.hlp
+;radasm help file
+6=$R\help\radasm.chm
+
+
+special thanks to KetilO, who helped me a lot improving and debugging this addin !
+
+
+elisabeth

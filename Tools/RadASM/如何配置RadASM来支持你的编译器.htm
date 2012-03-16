@@ -1,0 +1,423 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+<html>
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=gb2312">
+<title>如何配置RadASM来支持你的编译器</title>
+<style type="text/css">
+<!--
+body,td,th {
+	font-family: 宋体;
+	font-size: 9pt;
+	color: #0080C0;
+}
+.style1 {
+	font-size: 12pt;
+	font-weight: bold;
+	color: #ff00ff;
+}
+.style3 {color: #ff00ff}
+-->
+</style></head>
+
+<body>
+<p align="center" class="style1">如何配置RadASM来支持你的编译器</p>
+<p align="center"><a href="mailto:cao_cong_hx@yahoo.com.cn">cao_cong</a></p>
+<p> <span></span><SPAN 
+style="FONT-SIZE: 9pt; LINE-HEIGHT: 20px; FONT-FAMILY: 宋体"><FONT 
+color=#0080c0><SPAN 
+style="FONT-SIZE: 9pt; LINE-HEIGHT: 20px; FONT-FAMILY: 宋体">　　	这两天打算配置一下RadASM来支持一下 LCC-Win32 和 Turbo C++ 3.0，虽然以前给 RadASM 配置过支持VC6的Cpp文件，但当时做完就没管了，我这人又比较懒，不愿写东西，导致现在再配置时很多东西都忘了。这次只好又重新研究了一番，费时费力。配置完LCC后真有点筋疲力尽，不管别的了，先把配置的过程写下来，一是以后要用时可以看看，二也希望写出来让大家看了也能对配置编译器的过程清楚一点，可以自己动手来配置RadASM支持自己喜欢的编译器。Turbo C++ 3.0 的配置我已经不太想继续干了，谁有兴趣配置好了的话别忘了给我发一份。<br>
+                                                                <SPAN 
+style="FONT-SIZE: 9pt; LINE-HEIGHT: 20px; FONT-FAMILY: 宋体"><FONT 
+color=#0080c0><SPAN 
+style="FONT-SIZE: 9pt; LINE-HEIGHT: 20px; FONT-FAMILY: 宋体">　　 </SPAN></FONT></SPAN>在配置一个编译器之前，首先你要了解你所用的编译器编译、连接、资源编译程序的命令行选项，这样你配置时才能有的放矢。要知道相关程序的命令行选项的话你只需在命令提示符中输入相关程序就可得到。我一般喜欢在后面加一个 /? 参数。如这样：lcc.exe /? 。在控制台窗口中右击鼠标，把显示的命令行选项全选后复制到新建的一个文本文件，以便参考。我这次就以我配置的LCC编译器支持文件来作为模板，对各个部分进行讲解，可能比较罗嗦，主要还是想说清楚一点，让大家少走弯路。有什么说得不对的地方还请大家指正。另外我在配置时RadASM中提到的菜单及选项等都是基于我自己汉化的RadASM来谈的，如果给你造成了什么歧义的话，还请多多原谅。不浪费大家时间了，下面进入正题：<br>
+在开始之前，我把LCC-Win32 的命令行选项列出来(我都翻译过了)，以便大家对照：<br>
+-------------------------------------------------------------------------<br>
+lcc.exe(编译程序) 命令行： <br>
+选项 含义<br>
+-A 激活所有警告. <br>
+-ansic 禁用lcc-win32的语言扩展. <br>
+-D D后面跟随定义的符号. 例如:-DNODEBUG 定义<br>
+NODEBUG 符号. 注意: 在D和符号间没有空格<br>
+-check 检查给定源文件的错误. 不生成目标文件. <br>
+-E 生成一个中间文件及预处理程序输出.输出文件名将根据输入文件名来生成, 如,编辑 foo.c 你将得到foo.i. <br>
+-E+ 类似于 -E 选项, 还会生成一个#行号 xxx 指令,预处理程序生成一个 # xxx 指令. <br>
+-EP 类似 -E 选项,但不生成 #行号 指令. <br>
+-errout= 附加警告/错误信息到指定的文件.如 -errout=Myexe.err.将把所有警告和错误信息附加到 Myexe.err 中。 <br>
+-eN 设置最大错误数N. 例如:-e25. <br>
+-fno-inline 忽略内联指令. <br>
+-Fo&lt;文件名&gt; 强制输出文件名. <br>
+-g2 生成调试信息. <br>
+-g3 支持函数堆栈跟踪. 如果遇到一个中断,将显示函数堆栈. <br>
+-g4 支持函数堆栈及行号跟踪.<br>
+-g5 支持函数堆栈,行号及返回调用堆栈崩溃跟踪. <br>
+-I 把一个路径添加到包含的路径,如编译器查找头文件的路径.例:-Ic:\project\headers. 注意在I和后面跟随的路径之间没有空格.<br>
+-libcdll 使用用于 lcclibc.dll 的声明.用此选项编译的文件要在连接器 lcclnk 中使用 -dynamic 选项.<br>
+-M 在标准输出中显示当处理给定的输入文件时预处理程序打开的所有文件.不生成目标文件.<br>
+-M1 在标准输出中递归显示每个 include 文件，指出其调用自何处，何时关闭. <br>
+-nw 不显示警告.错误仍将显示. <br>
+-O 优化输出. 这将启动 peephole 优化器. <br>
+-o &lt;文件&gt;用于给定输出文件的名称.与上面的 Fo 参数相同. <br>
+-overflowcheck <br>
+生成代码测试所有加,减,乘的溢出.<br>
+-p6 启用 Pentium III 指令<br>
+-profile 注入代码到已生成的程序中来测试执行时间.此选项不兼容调试级别高于 2 的程序. <br>
+-S 生成一个汇编文件. 输出文件名依赖于输入文件.如:编辑 foo.c 你将得到 foo.asm. <br>
+-s n 设置转换密度为 n ,值必须在 0.0 和 1.0 之间. 如: -s 0.1 <br>
+-shadows 当一个本地变量覆盖了一个全局变量时警告. <br>
+-stackinit n <br>
+函数入口值为 &quot;n&quot; 时初始化未初始化的堆栈.<br>
+-U 未定义符号跟随在U后面. <br>
+-unused 警告未使用的分配并禁止垃圾代码.<br>
+-v 显示编译器版本和编辑日期<br>
+-z 生成一个 LCC 中间语言的文件.生成的文件以 .lil 为扩展名. <br>
+-Zp[1,2,4,8,16] 设置结构的默认队列为一, 二, 四,等. <br>
+如果你设为一,实际上等于无队列.<br>
+------------------------------------------------------------------------- <br>
+命令行选择区分大小写.使用 &quot;-&quot; 或 &quot;/&quot; 在<br>
+命令行中引入选项. <br>
+<br>
+------------------------------------------------------------------------- <br>
+lcclnk.exe(连接程序) 命令行： <br>
+Lcclnk 命令行选项.使用 &quot;-&quot; 或 &quot;/&quot; 在命令行中引入选项. <br>
+-o &lt;文件名&gt; <br>
+设置输出文件名称.请在 o 和文件名间插入一个空格.<br>
+-errout&lt;文件名&gt; <br>
+把所有警告/错误信息写入到指定名称的文件. <br>
+-subsystem &lt;subsystem&gt; <br>
+指出输出文件类型. Console 或 windows 程序<br>
+-stack-commit &lt;数字&gt; <br>
+选择此选项,你可以提交多于一个的页面(4096 字节). <br>
+-stack-reserve &lt;数字&gt; <br>
+默认堆栈大小为 1MB. 用此选项改变限制. <br>
+-dynamic<br>
+使用 lcclibc.dll 作为默认库并动态链接到程序,用以代替连接到 libc.lib. <br>
+-dll <br>
+此选项告诉连接程序这是一个 .dll 文件而不是一个 .exe 文件. <br>
+-map &lt;文件名&gt; <br>
+   指定 map 文件名.此选项不兼容 -s 选项. <br>
+-nolibc <br>
+不包括标准 C 程序库. <br>
+-s <br>
+从程序中去除所有符号和调试信息.<br>
+-version nn.nn<br>
+为程序添加版本号.<br>
+-errout=&lt;文件名&gt; <br>
+写入所有警告或错误到给定名称的文件.注意在文件名和等号间没有空格.<br>
+-nounderscores <br>
+例如创建一个用于 Visual Basic 的 DLL 时,最好 DLL 的输出函数名没有下划线.<br>
+-entry &lt;fnname&gt;<br>
+设置 DLL 的入口点函数<br>
+-version<br>
+输出版本名称</SPAN></FONT></SPAN></p>
+<p>-------------------------------------------------------------------------<br>
+				lcclib.exe(编译库(Lib)的工具) 命令行： <br>
+				格式: <br>
+				lcclib &lt;libfile.lib&gt; &lt;目标文件&gt; <br>
+				选项: <br>
+				/out:输出文件<br>
+				/extract:目标<br>
+				/remove:目标<br>
+				/verbose: 显示输出过程<br>
+				默认同名的目标文件将被替换</p>
+<p>-------------------------------------------------------------------------<br>
+				lrc.exe(编译资源脚本的程序) 命令行： <br>
+				<br>
+				用法: lrc [选项] .RC 输入文件<br>
+				选项: <br>
+				/r: 生成 .RES 文件.这是预设好的... <br>
+		        /v:     显示细节(Verbose)<br>
+				/z: 生成一个 .map 文件.名称依赖于输入文件<br>
+				/d: 定义符号<br>
+				/o: 输出到指定文件. <br>
+				'o' 和文件名间没有空格<br>
+				/fo: 输出到指定文件. <br>
+				'o' 和文件名间没有空格<br>
+				/l: 默认语言号<br>
+				后面应立即跟随十进制的语言号.'l'和语言号之间没有空格<br>
+				/i: 添加一个 include 路径. <br>
+				'i'和路径间没有空格<br>
+				/a: 写打包文件(图标,位图, 等等) <br>
+				选项不区分大小写<br>
+				-------------------------------------------------------------------------<br>
+				<SPAN 
+style="FONT-SIZE: 9pt; LINE-HEIGHT: 20px; FONT-FAMILY: 宋体"><FONT 
+color=#0080c0><SPAN 
+style="FONT-SIZE: 9pt; LINE-HEIGHT: 20px; FONT-FAMILY: 宋体">　　 </SPAN></FONT></SPAN>配置一个让RadASM支持的编译器只需写一个INI文件，把各个段配置好。配置好后放在RadASM目录，直接在RadASM的菜单选项-&gt;编程语言中把你的配置文件添加进去就可以了。我这里把配置的文件命名为Lcc.ini，我把每个段都列出来(列主要我们要配置的部分)，各个段的含义我在每个列出的段后用“//”开头的注释说明。<br>
+				<span class="style3">[Description]<br>
+				1=Lcc Win32</span></p>
+<p>//这个段是对你配置的编译器描述，你可以随便写。</p>
+<p class="style3">[Enviroment]<br>
+				1=path,C:\Lcc\Bin;</p>
+<p>//这相当于环境变量，RadASM会到path后面指定的路径查找相关程序。</p>
+<p class="style3">[CharTab]<br>
+				2=0251222522222236;20-2F<br>
+				3=1111111111222221;30-3F</p>
+<p>//字符表定义，0到127的默认字符表，与我们没多少关系，随便在RadASM中找一个配置好的编译器支持文件复制过来就行了。</p>
+<p class="style3">[Open]<br>
+				0=&quot;C++ 文件 (*.c;*.cpp;*.h),*.c;*.cpp;*.h&quot;<br>
+				1=&quot;资源文件 (*.rc),*.rc&quot;<br>
+				2=&quot;文本文件 (*.txt),*.txt&quot;<br>
+				3=&quot;宏文件 (*.dsm),*.dsm&quot;<br>
+				4=&quot;所有文件 (*.*),*.*&quot;<br>
+				src=&quot;C++ 文件 (*.cpp),*.cpp,cpp&quot;<br>
+				hdr=&quot;头文件 (*.h),*.h,h&quot;<br>
+				mod=&quot;模块 (*.cpp),*.cpp,cpp&quot;</p>
+<p>//工程中默认打开的文件类型列表，根据你的编译器源文件类型进行修改。</p>
+<p class="style3">[CodeMacro]<br>
+				;关键字,活动行前插入,活动行后插入<br>
+				;{I}=从关键字行复制缩进<br>
+				;{C}=回车符<br>
+				;{S}=空格符<br>
+				;{T}=制表符<br>
+				;{$}=复制 Proc/Struct 名称<br>
+				;宏的设置默认已开启自动缩进<br>
+				1=if(),{{C}{T},{C}{I}}<br>
+				2=else,{T},<br>
+				3=elseif,{T},<br>
+				4=while,{T},{C}{I}<br>
+				;5=<br>
+				6=$ ),{{C}{I}{T},{C}{I}}<br>
+				7=struct $,{T},{C}{I}}<br>
+				8=for(),{{C}{T},{C}{I}}<br>
+				9={,{T},{C}{I}}<br>
+				;10=</p>
+<p>//这个段称之为代码宏，就是当你在RadASM的编辑器中输入代码时根据你的输入自动完成的内容。“;”后为注释，我翻译了一下。我们选1=if(),{{C}{T},{C}{I}}这条来讲解一下其含义：1是序号，不用多说，if(),{{C}{T},{C}{I}}是指当我在编辑器中输入if()回车后，首先在第二行开始输出一个“{”再自动回车到下一行开始输出一个制表符，再回车到第四行把第一行的if()开始位置复制过来，后面跟一个“}”，光标的位置定位在第二行的制表符后。实际效果如下：<br>
+				if()<br>
+				{<br>
+                <SPAN 
+style="FONT-SIZE: 9pt; LINE-HEIGHT: 20px; FONT-FAMILY: 宋体"><FONT 
+color=#0080c0><SPAN 
+style="FONT-SIZE: 9pt; LINE-HEIGHT: 20px; FONT-FAMILY: 宋体">　　 </SPAN></FONT></SPAN>//光标位置<br>
+}<br>
+				if(),{{C}{T},{C}{I}}中if()是指自动完成时的关键字，紧跟在逗号后的{{C}{T}指在活动光标前插入的字符，最后的{C}{I}}是指在活动光标后插入的字符。在这个段中的{$}是用来复制函数或结构名称的。我在6=$ ),{{C}{I}{T},{C}{I}}中配置的$ )是希望我输入一个函数并加 )后能自动给我完成的，可惜好象工作的不好，只对汇编的编译器有效。</p>
+<p class="style3">[Code]<br>
+				ParseDll=CppParse.dll<br>
+				Skip=<br>
+				Code=<br>
+				Const=<br>
+				Data=<br>
+				Macro=<br>
+				Struct=<br>
+				Label=</p>
+<p>//这个段功能是用于查找并获取代码属性的。对汇编语言支持比较好。举个masm里的例子：Code=? endp,$ proc意思是指识别为代码时检测任意名称命名的 proc，结束为 endp。例如：<br>
+				test proc<br>
+				...<br>
+				endp<br>
+				在masm工程中就会把此部分识别为代码。</p>
+<p class="style3">[CodeBlock]<br>
+				1={,},,,0<br>
+				2=<br>
+				3=<br>
+				4=<br>
+				5=<br>
+				6=<br>
+				7=<br>
+				8=<br>
+				9=<br>
+				10=<br>
+				11=<br>
+				12=<br>
+				13=<br>
+				14=<br>
+				15=</p>
+<p>//代码块，用于标记可折叠的代码块。如1={,},,,0是指开始为“{”结束为“}”的就标记为代码块，将会自动在第一个开始的 { 那放一个可折叠的标记。后面各个逗号中选项大家可以参考帮助文件。最后的那个0是标志位。</p>
+<p class="style3">[Api]<br>
+				Trig=<br>
+				Call=Masm\masmApiCall.api<br>
+				Const=Masm\masmApiConst.api<br>
+				Struct=Masm\masmApiStruct.api<br>
+				Word=Cpp\cppWord.api<br>
+				Message=Masm\masmMessage.api<br>
+				Type=Cpp\cppType.api<br>
+				inc=#include,&quot;,&quot;<br>
+				lib=</p>
+<p>//这是代码书写助手(Code write helpers)的功能。在你写代码时自动列出函数及在工具栏上显示函数。根据情况定义各个文件。</p>
+<p class="style3">[Edit]<br>
+				CodeFiles=.c.cpp.h.rc.tpl.rad.def.api.nsi.dsm.</p>
+<p>//这个段是配置编辑环境的，可在RadASM的选项中直接配置，我不全列出来了。基本上可以找个配置好的编译器文件照抄。主要注意上面的这条，这是你的编译器要使用的文件。</p>
+<p class="style3">[Dialog]<br>
+...</p>
+<p>//这是对话框编辑器中的选项，可以在选项中设置。照抄别的。</p>
+<p class="style3">[Error]<br>
+  BookMark=3<br>
+  nAsm=99<br>
+  Identify=Error<br>
+Skip=2</p>
+<p>//根据作者给我的最新的2.2.0.6版本中的解释，各个关键词的含义如下：</p>
+<p class="style3">BookMark=3</p>
+<p>//这句对应2.2.0.6版本中代码编辑器选项中新增加的编译器错误处理部分的内容。可在选项中设置。</p>
+<p class="style3">nAsm=99</p>
+<p>//这句是指定编译器的。仅当不在 [Code] 段中具体设置编译器时才需考虑。各个含义如下：</p>
+<p>MASM=1<br>
+  TASM=2<br>
+  FASM=3<br>
+  GOASM=4<br>
+  NASM=5<br>
+  HLA=6<br>
+  CPP=7<br>
+  BCET=8<br>
+  其他编译器=99</p>
+<p>如果我们要配置新的非以上类型的编译器的话，就应设成象上面一样：nAsm=99</p>
+<p class="style3">Identify=Error</p>
+<p>//这句是指错误的关键字是什么。</p>
+<p class="style3">Skip=2</p>
+<p>//这句是指在输出窗口中发现了在 Identify 中指定的关键字内容后，在文件名前跳过的单词个数。如象下面这样的错误：<br>
+  Error E2378 test.cpp 26: Return statement missing ; ……<br>
+  就会跳过前面的 Error 和 E2378 这两个词后定位到文件名上。这样 RadASM 就能正确跳到出错行了。</p>
+<p class="style3">[Paths]<br>
+				$A=C:\Lcc<br>
+				$B=$A\Bin<br>
+				$D=$R\AddIns<br>
+				$H=masm32\Help<br>
+				$I=$A\Include<br>
+				$L=$A\Lib<br>
+				$P=$R\Lcc\Projects<br>
+				$S=$R\Lcc\Sniplets<br>
+				$T=$R\Lcc\Templates<br>
+				$M=$R\Lcc\Macro<br>
+				$E=C:\Ollydbg</p>
+<p>//这个段是路径设置，各个标志与设置路径选项中对应为：$A-&gt;App:，编译器的安装路径；$B-&gt;Bin:，编译、连接、资源编译等程序的路径。其它的我就不讲了，比较简单。只是注意$R是指RadASM的安装路径。如你的RadASM安装在E:\RadASM，$R就指这个目录。这些标志可在下面的工程配置中使用。</p>
+<p class="style3">[MakeFiles]<br>
+				0=.rap<br>
+				1=.rc<br>
+				2=.cpp<br>
+				3=.obj<br>
+				4=.res<br>
+				5=.exe<br>
+				6=.def<br>
+				7=.dll<br>
+				8=.txt<br>
+				9=.lib<br>
+				10=.mak<br>
+				11=.c<br>
+				12=.com<br>
+				13=.ocx<br>
+				14=.idl<br>
+				15=.tlb</p>
+<p>//这个段是用于在创建工程时每个工程中所包含的文件类型。记住上面各个序号对应的文件类型，后面要用到。</p>
+<p class="style3">[Project]<br>
+				Type=Win32 App,Console App,Dll Project,Ocx Project,LIB Project,Win32 App (no res),Dll Project (no res),Ocx Project (no res)<br>
+				Files=cpp,h,Rc,Def,Txt,Mak,dsm,idl<br>
+				Folders=Bak,Mod,Res<br>
+				MenuMake=编译资源脚本,编译,连接,构建,构建并运行,运行,在调试器中运行,全部构建并运行,编译模块<br>
+				Group=1<br>
+				GroupExpand=1</p>
+<p>//终于接近最关键的部分了。这个段是设置你的编译器所支持的编译程序类型等。在Type后面定义的是工程类型，名字将作为下面每个具体工程配置段的关键字。Files后面是指工程中所用到的文件类型，用扩展名表示。Folders后面是指出建立工程时在新建的工程目录下有哪些子目录可用。Bak目录用于备份你的每次修改；Mod目录我不太清楚，大概是用于模块(module)的目录，基本没选过这个目录。Res目录是用来保存你的资源文件的。MenuMake后面是指在RadASM构建菜单下的子菜单中显示的项目。后面的Group和GroupExpand是用来定义工程组的，照抄就行了。</p>
+<p class="style3">[MakeDefNoProject]<br>
+				MenuMake=1,1,1,1,1,1,1,0,0<br>
+				1=rsrc.res,O,$D\RC.EXE /v,rsrc.rc<br>
+				2=$.obj,O,$B\LCC.EXE /O /unused /c /errout=error.txt /I&quot;$I&quot;,$.cpp<br>
+				3=$.exe,O,$B\LCCLNK.EXE /s /SUBSYSTEM WINDOWS,$.obj,$.res<br>
+				4=0,0,,$.exe<br>
+				5=rsrc.obj,O,$D\CVTRES.EXE,rsrc.res<br>
+				6=*.obj,O,$B\LCC.EXE /O /unused /c /errout=error.txt /I&quot;$I&quot;,*.cpp<br>
+				7=0,0,&quot;$E\OllyDbg&quot;,$.exe<br>
+				11=rsrc.res,O,$D\RC.EXE /v,rsrc.rc<br>
+				12=$.obj,O,$B\LCC.EXE /g2 /O /unused /c /errout=error.txt /I&quot;$I&quot;,$.cpp<br>
+				13=$.exe,O,$B\LCCLNK.EXE /SUBSYSTEM WINDOWS,$.obj,$.res<br>
+				14=0,0,,$.exe<br>
+				15=rsrc.obj,O,$D\CVTRES.EXE,rsrc.res<br>
+				16=*.obj,O,$B\LCC.EXE /g2 /O /unused /c /errout=error.txt /I&quot;$I&quot;,*.cpp<br>
+				17=0,0,&quot;$E\OllyDbg&quot;,$.exe</p>
+<p>//这里是默认设置，就是你不在RadASM中建立工程，只用RadASM打开源文件执行编译时的配置。这里和下面一段可说是最重要的部分了，请注意看，我一条条的讲解，尽量说的清楚点。先说一下可能用到的几个特殊字符的含义：<br>
+				<span class="style3">$</span>：从RadASM编辑器的最顶部标题栏中获取的不带扩展名的文件名。如打开test工程下的名为test.cpp的文件，这里的$就相当于test，就等于你不带扩展名的文件名称。下面会详细说明。 <br>
+				<span class="style3">|</span>：这个符号将在实际编译工程时替换为“,”(逗号)。如$D\RC.EXE /v,rsrc.rc|test.rc 实际编译时就会是这样(假定RadASM装在E盘根目录下)：E:\RadASM\Addins\RC.EXE /v rsrc.rc,test.rc<br>
+				<span class="style3">*</span>：这个符号在编译模块(moudle)时使用。<br>
+				MenuMake=1,1,1,1,1,1,1,0,0,0 这一条的意思是在构建菜单上可用的子菜单项目。我们来看一下上面的Project段中的MenuMake：<br>
+				MenuMake=编译资源脚本,编译,连接,构建,构建并运行,运行,在调试器中运行,全部构建并运行,编译模块<br>
+				我们数一下，每个逗号分隔的算一个项目，共有9个。再看MenuMake=1,1,1,1,1,1,1,0,0,0 共有9个。这里个数无所谓，1是指对应的子菜单激活，0是不激活。这样MenuMake=1,1,1,1,1,1,1,0,0,0 等同于<br>
+				MenuMake=编译资源脚本,编译,连接,构建,构建并运行,运行,在调试器中运行 共7个子菜单激活。<br>
+MenuMake=1,1,1,1,1,1,1,0,0 下面的1到17是编译选项，其中1到7是编译为Release(发行版)时的设置，11到17是指编译为Debug(调试版)时的设置。这里只说1到7的含义，11到17与1到7的类似。首先说一下各个序号的含义：1是指资源编译选项；2是指编译选项；3是指连接选项；4是指运行编译好的程序；5是用于CVTRES的，转换res文件到obj文件；6是编译模块选项；7是指在调试器中运行。1到7的含义如下：</p>
+<p class="style3">1=rsrc.res,O,$D\RC.EXE /v,rsrc.rc</p>
+<p>//这条用于编译资源，用逗号分隔每个项。rsrc.res 是指在执行编译前如果有这个文件就先删掉。O(注意这里不是0，是大写的字母O)是指在RadASM的输出窗口中显示所有执行命令行时的信息。如果这里是大写字母C，则是指在控制台中显示信息，不在输出窗口中显示。其它两个参数OT和CT与O和C含义类似。$D\RC.EXE /v 是指执行RadASM的Addins目录下的RC.EXE来编译后面的rsrc.rc到rsrc.res。/v是RC.EXE的命令行选项。LCC自带有一个资源编译程序，我原来是这样配置的：1=$.res,O,$B\LRC.EXE /v,$.rc 这里的$是指从RadASM编辑器的最顶部标题栏中获取的不带扩展名的文件名。如我打开一个工程中的文件，RadASM的顶部标题显示如下：<br>
+				RadASM - dialog - [E:\RadASM\Lcc\projects\dialog\dialog.cpp] <br>
+				此时$取的内容就是 dialog.cpp 中的 dialog (<span class="style3">注意：在RadASM中新建一个工程时有两个选项：一个是工程名称，一个是工程说明。打开一个工程时若不打开任何文件的话，在RadASM的顶部显示的是工程说明的内容，但此时你进行编译的话RadASM取的是工程名称。如我建的工程名称是dialog，工程说明是对话框示例，打开这个工程不打开任何文件时RadASM顶部显示的就是RadASM - 对话框示例，但在编译工程时$还是用的工程名称dialog</span>)。这样如果编译上面的示例工程的话，1=$.res,O,$B\LRC.EXE /v,$.rc 就相当于这样(假定你的LCC编译器的目录放在放在E盘的根目录下，如：E:\LCC，这里的$B是从上面的[Paths]段中来的，你配置好了的话$B就等同于E:\LCC\Bin目录)：<br>
+				1=dialog.res,O,E:\LCC\Bin\LRC.EXE /v,dialog.rc<br>
+				为什么没再用LCC原来自带的资源编译器呢？主要是我配置好后测试时，我明明在对话框中选的是宋体，9号，可编译后的程序按钮上显示的不知是什么字体，而且还是个斜体。搞得我还以为那里弄错了，查了半天。后来看LCC的用户手册，才知道它的资源编译器还不支持字体，说正在改进中。为此，我就放弃了它的资源编译器，还是用微软的吧。这里注意要把RC.EXE复制到你RadASM的Addins目录下。如果你是用我做的汉化版的话，这一步可省略。</p>
+<p class="style3">2=$.obj,O,$B\LCC.EXE /O /unused /c /errout=error.txt /I&quot;$I&quot;,$.cpp</p>
+<p>//这条用于编译程序，$.obj,O 两个与上面讲的类似，也是先删除你所做工程名字.obj，在输出窗口中输出信息。$B\LCC.EXE /O /unused /c /errout=error.txt /I&quot;$I&quot; 是编译选项，后面的/I&quot;$I&quot;是查找include目录用的。$I就是LCC下的include目录，如LCC装在E盘根目录的话(下面我再讲的时候都默认你的RadASM和LCC都装在E盘根目录下)，$I就代表E:\LCC\include目录。其实上面这句在下面具体定义的工程项中还可以这样写：<br>
+				2=3,O,$B\LCC.EXE /O /unused /c /errout=error.txt /I&quot;$I&quot;,2<br>
+				这里与上面那句不同的地方就是把$.obj换成了3，$.cpp换成了2。为什么可以这样换？这是根据[MakeFiles]段中定义的文件类型对应的序号来的。看一下[MakeFiles]段，其中 2=.cpp 3=.obj 这里的替换后的2和3就是对应你工程名的cpp和obj文件，与$.cpp和.obj功能相同。</p>
+<p class="style3">3=$.exe,O,$B\LCCLNK.EXE /s /SUBSYSTEM WINDOWS,$.obj,$.res</p>
+<p>//这条用于连接程序。各条对应情况与前面的两条类似。假设你象我一样测试的是E:\RadASM\Lcc\Projects\dialog\dialog 下的dialog工程，$B\LCCLNK.EXE /s /SUBSYSTEM WINDOWS,$.obj,$.res执行后效果是这样：<br>
+				E:\Lcc\Bin\LCCLNK.EXE /s /SUBSYSTEM WINDOWS &quot;dialog.obj&quot; &quot;dialog.res&quot;<br>
+				同样你也可以在具体项目定义中把$.exe对应换成5，$.res对应换成4。</p>
+<p class="style3">4=0,0,,$.exe</p>
+<p>//这条命令是运行编译好的程序。这里的0,0(注意是数字0)，照抄别的就可以了。只是如果编译的是控制台程序的话，为防止运行时看不到效果，可这样写：4=0,0,$D\RunStub,$.exe 这里的RunStub.exe是我上次发现在RadASM中运行dos程序看不到效果，就跟RadASM的作者说了一下，他提供的这个小工具，现在已包含在masm的Projects目录中了。把它复制到Addins目录即可。另外你也可以用LCC的Bin目录下的一个rundos.exe小工具，不但支持按任意键退出，还可显示执行时间，推荐。可以在控制台工程中这样配置：4=0,0,$B\rundos.exe,$.exe</p>
+<p class="style3">5=rsrc.obj,O,$D\CVTRES.EXE,rsrc.res</p>
+<p>//这条命令是用CVTRES.EXE转换.res文件到.obj文件的。我把第三项修改为 $D\CVTRES.EXE 是因为 CVTRES.EXE 是微软的程序，LCC中没有。我把这个程序复制到了Addins目录。如果你的Addins目录中没有这个文件的话请把这个文件从masm32的bin目录下复制过来。</p>
+<p class="style3">6=*.obj,O,$B\LCC.EXE /O /unused /c /errout=error.txt /I&quot;$I&quot;,*.cpp</p>
+<p>//这条命令是用于编译模块的，其中的*.cpp中的“<span class="style3">*</span>”只在编译模块(module)时使用。一般可用于编译你添加的其它源文件。</p>
+<p class="style3">7=0,0,&quot;$E\OllyDbg&quot;,$.exe</p>
+<p>//这条命令是用调试器打开你编译好的程序。照抄即可。</p>
+<p class="style3">[Win32 App]<br>
+				Files=1,1,1,0,0,0,0,0<br>
+				Folders=1,0,1<br>
+				MenuMake=1,1,1,1,1,1,1,0,0,0<br>
+				;x=FileToDelete/CheckExistsOnExit,<br>
+				;(O)utput/(C)onsole/0,Command,<br>
+				;MakeFile1[,MakeFile2[,MakeFile3...]]<br>
+				1=4,O,$D\RC.EXE /v,1<br>
+				2=3,O,$B\LCC.EXE /O /unused /c /errout=error.txt /I&quot;$I&quot;,2<br>
+				3=5,O,$B\LCCLNK.EXE /s /SUBSYSTEM WINDOWS /o &quot;$5&quot;,3,4<br>
+				4=0,0,,5<br>
+				5=rsrc.obj,O,$D\CVTRES.EXE,rsrc.res<br>
+				6=*.obj,O,$B\LCC.EXE /O /unused /c /errout=error.txt /I&quot;$I&quot;,*.cpp<br>
+				7=0,0,&quot;$E\OllyDbg&quot;,5<br>
+				11=4,O,$D\RC.EXE /v,1<br>
+				12=3,O,$B\LCC.EXE /g2 /O /unused /c /errout=error.txt /I&quot;$I&quot;,2<br>
+				13=5,O,$B\LCCLNK.EXE /SUBSYSTEM WINDOWS /o &quot;$5&quot;,3,4<br>
+				14=0,0,,5<br>
+				15=rsrc.obj,O,$D\CVTRES.EXE,rsrc.res<br>
+				16=*.obj,O,$B\LCC.EXE /g2 /O /unused /c /errout=error.txt /I&quot;$I&quot;,*.cpp<br>
+				17=0,0,&quot;$E\OllyDbg&quot;,5</p>
+<p>//这个段就是具体工程的配置。[Win32 App]就是你在[Project]的Type中定义的工程项目。配置方法可以参照上面的[MakeDefNoProject]段的设置，再对具体工程进行修改。下面的具体各个段我就不列出来了，具体内容可以看一下我汉化的RadASM 2.2.0.5b 中的lcc.ini文件。<br>
+</p>
+<p class="style3">[MenuMake]<br>
+				1=编译资源脚本(&amp;C),372,M,1<br>
+				2=编译(&amp;A),116,M,2<br>
+				3=连接(&amp;L),1652,M,3<br>
+				4=构建(&amp;B),1396,M,2,3<br>
+				5=-,0,M,<br>
+				6=构建并运行(&amp;G),628,M,2,3,4<br>
+				7=-,0,M,<br>
+				8=运行(&amp;R),884,M,4<br>
+				9=在调试器中运行(&amp;D),580,M,7<br>
+				10=-,0,M,<br>
+				11=全部构建并运行(&amp;A),1140,M,1,2,3,4<br>
+				12=-,0,M,<br>
+				13=编译模块(&amp;M),0,M,6<br>
+				Ver=100</p>
+<p>//这里就是你在RadASM的构建菜单上看到的子菜单，可以照抄后修改。其中的如 5=-,0,M, 是在子菜单之间加一条分隔线。</p>
+<p class="style3">[Color]<br>
+				...</p>
+<p>//这个段是用于在RadASM中设置语法高亮及背景色等颜色的，具体内容我不列了，可在颜色及关键字选项中设置。可先照抄一个再在RadASM中修改。</p>
+<p class="style3">[KeyWords]<br>
+				...</p>
+<p>//这个段是设置语法高亮的关键字。照抄后自己手工修改。也可在RadASM的颜色及关键字选项中设置。</p>
+<p class="style3">[ReallyRad]<br>
+				...</p>
+<p>//ReallyRad插件配置，可在ReallyRad插件的选项中修改。照抄。</p>
+<p class="style3">[RadHelp]<br>
+				...</p>
+<p>//RadHelp插件设置，用于帮助文件。照抄后自己修改，也可在RadHelp插件中修改。</p>
+<p class="style3">[MenuMacro]<br>
+				...</p>
+<p>//宏菜单，照抄，可在RadASM的选项中设置。</p>
+<p> <SPAN 
+style="FONT-SIZE: 9pt; LINE-HEIGHT: 20px; FONT-FAMILY: 宋体"><FONT 
+color=#0080c0><SPAN 
+style="FONT-SIZE: 9pt; LINE-HEIGHT: 20px; FONT-FAMILY: 宋体">　　</SPAN></FONT></SPAN>到这里已经全部配置完了，现在就是测试。先把配置好的文件(我这里是lcc.ini)放到RadASM目录下，在RadASM的选项-&gt;编程语言中添加一下。再在RadASM的目录下新建一个文件夹，我们这里命名为Lcc，按照别的编译器文件夹的结构依次建立好子文件夹。建好文件夹后在RadASM的选项中把路径设置好，现在我们就可以建立一个工程来测试了。不知大家注意到没有，我在编译选项中是这样设置的：$B\LCC.EXE /O /unused /c /errout=error.txt /I&quot;$I&quot; 。这个/errout=error.txt 选项是把出现的错误和警告写入到error.txt文件中。原来我是没添加这个选项的，但在RadASM中编译一个没有任何错误的工程时输出窗口中的编译进度条一直显示进程，没法完成。改为控制台输出则可以。但控制台输出的话我将看不到错误信息，后来加了这个 /errout=error.txt 参数才解决了这个问题。我这里想说的就是出现问题时先不要急，再研究研究命令行选项，可能就可以解决了。测试中还有一个问题就是我要是把连接选项设成这样：<br>
+				3=5,O,$B\LCCLNK.EXE /s /SUBSYSTEM WINDOWS /o &quot;$5&quot;,3,4<br>
+				如果我编译的程序中根本没有资源的话将会出错。这样只好建两个项目，一个是有资源的，一个是无资源的。有资源的就用上面这条连接选项，无资源的用这条连接选项：<br>
+				3=5,O,$B\LCCLNK.EXE /s /SUBSYSTEM WINDOWS /o &quot;$5&quot;,3<br>
+				这样就行了。现在没有错误的工程我们都编译成功了，再来测试一下源码中有错误的工程编译时的情况。我把源程序中这句 return FALSE; 后面的分号删掉，变成这样：return FALSE 再编译一下，在输出窗口中显示错误如下：<br>
+				<span class="style3">1 error, 0 warnings<br>
+				Error dialog.cpp: 30 Syntax error; missing semicolon before `}'</span><br>
+				好，我在第二行的Error dialog.cpp 上双击一下，看看能不能跳到出错的位置。很不幸，出现一个错误：“无法打开文件 E:\RadASM\Lcc\Projects\dialog\” 为什么？没办法，请出OllyDBG来调试一下RadASM。先用spy查找一下输出窗口的句柄，再在OllyDBG中设个203 WM_LBUTTONDBLCLK 的消息断点(这个断点的意思就是如果在输出窗口中双击鼠标左键时中断)，先在RadASM中打开其它编译器中可以正常跳转到出错行的工程，双击输出窗口中的错误，被OllyDBG拦下。分析一下，再打开我们自己新建编译器中的工程，双击出错行再进行分析。具体分析过程我不写了，最后得出的结论是由RadASM目录下的RAEdit.dll控制错误跳转，它只认这种格式的错误：<br>
+				<span class="style3">dialog.cpp(31) : error C2143: syntax error : missing ';' before '}'</span><br>
+				就是说格式为：源文件名(出错行号):出错信息。而LCC的错误信息格式为：Error 源文件名: 出错行号 出错信息<br>
+				RadASM把前面的 Error 作为源文件名，当然打不开文件。这时怎么办呢？一个方法就是自己写一个插件专门处理新建编译器的出错信息跳转，另一种方法就是给RadASM的作者写封信，让他来帮助解决。第一种太烦，我不干，我选第二种。只要让RadASM的作者修改几条代码就行了。另外别忘了把你配置好的文件发给他(这里要注意把配置文件中的中文都改成英文，编辑器中的选项都改为对应英文环境的，我们也要国际化嘛^_^)，让他集成到RadASM中去。</p>
+<p>提示：根据 RadASM 的最新版本 2.2.0.6 的说明，现在可以把 <span class="style3">1=4,O,$D\RC.EXE /v,1</span> 这样的编译配置改为 <span class="style3">1=4,O,$B\LRC.EXE /v,1</span>，作者在对话框编辑器中提供了一个选项“限定字体信息”可以保证用 LRC.EXE 编译的资源字体显示正常。2.2.0.6版已完全支持 LCC。</p>
+</body>
+</html>
