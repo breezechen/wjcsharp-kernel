@@ -1,0 +1,111 @@
+[Project]
+Assembler=dm
+Type=Win32 App (no res)
+Description=Standard Win32 application
+Backup=$P\Bak\
+Group=1
+GroupExpand=1
+Debug=0
+[Files]
+1=Win32StdEXE.c
+2=Win32StdEXE.h
+[MakeFiles]
+0=Win32StdEXE.rap
+1=Win32StdEXE.rc
+2=Win32StdEXE.c
+3=Win32StdEXE.obj
+4=Win32StdEXE.res
+5=Win32StdEXE.exe
+6=Win32StdEXE.def
+7=Win32StdEXE.dll
+8=Win32StdEXE.txt
+9=Win32StdEXE.lib
+10=Win32StdEXE.mak
+11=Win32StdEXE.cpp
+12=Win32StdEXE.com
+13=Win32StdEXE.ocx
+14=Win32StdEXE.idl
+15=Win32StdEXE.tlb
+[MakeDef]
+Menu=0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0
+1=
+2=0,O,$B\dmc.exe -I"$L"  -mn -c -WA -6 -S -C -P -o"$3",2 
+3=5,O,$B\link.exe /SCANLIB /MACHINE:i386 /NOMAP /NOLOGO /SUBSYSTEM:WINDOWS /EXETYPE:NT "$C"\"$3" | "$5" || gdi32.lib
+4=0,0,,5
+5=
+6=*.obj,O,$B\dmc  /mn /c  /I"$I",*.c
+7=0,0,"$E\OllyDbg",5
+11=
+12=3,C,$B\dmc.exe  -S -mn -p -c -C -d -o"$3" -o+space | 2
+13=5,O,$B\link.exe /SUBSYSTEM:WINDOWS /EXETYPE:NT "$3" | "$5"
+14=0,0,,5
+15=rsrc.obj,O,$D\CVTRES.EXE,rsrc.res
+16=*.obj,O,$B\dmc  /mn /c /g2  /I"$I",*.c
+17=0,0,"$E\OllyDbg",5
+[Group]
+Group=Added files,Assembly,Resources,Misc,Modules
+1=2
+2=2
+[VersionControl]
+Settings=512
+Milestones=129
+MilestoneEvery=10
+MilestoneEveryCurrent=0
+MilestoneOnBuild=0.0.0.0
+MilestoneOnTime=2
+MilestoneOnDate=0
+MilestoneOnDateWhen=1
+MilestoneOnDateStatus=0
+MilestoneOnDateDate=8
+MilestoneOnDateTimeYear=2008
+MilestoneOnDateTimeMonth=7
+MilestoneOnDateTimeDate=4
+MilestoneOnDateTimeHour=12
+MilestoneOnDateTimeMin=5
+MilestoneOnDateTimeSec=14
+MilestoneOnDateTimeStatus=0
+BackupLocation=C:\RADASM\dm\Projects\VCBackups\
+CompressionLevel=0
+DefaultComment=Project $N, $Z, Backup Created On $D At $T.
+ExcludeExt1=\
+ExcludeExt2=\
+ExcludeExt3=\
+ExcludeExt4=\
+FileVerLength=4
+FileVer2Range=0
+FileVer3Range=0
+FileVer4Range=0
+ProductVerLength=4
+ProductVer2Range=0
+ProductVer3Range=0
+ProductVer4Range=0
+[Colref]
+0=00FFFFFF
+1=00FFFFFF
+2=00FFFFFF
+3=00FFFFFF
+4=00FFFFFF
+5=00FFFFFF
+6=00FFFFFF
+7=00FFFFFF
+[PTimer]
+PTimer=4893672
+[Collapse]
+1=
+2=
+[Size]
+1=0,0,0,0,343
+2=0,0,0,0,0
+[BookMark]
+0=
+1=
+2=
+3=
+4=
+5=
+6=
+7=
+8=
+9=
+[BreakPoint]
+0=
